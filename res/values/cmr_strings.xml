@@ -314,4 +314,7 @@
     <string name="hw_keys_title">Hardware keys</string>
     <string name="hw_keys_summary">Enable hardware keys</string>
 
+    <!-- PerformanceControl -->
+    <string name="performance_settings">Performance</string>
+
 </resources>

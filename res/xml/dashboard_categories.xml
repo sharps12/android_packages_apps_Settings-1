@@ -265,6 +265,14 @@
                 android:icon="@drawable/ic_settings_print"
                 />
 
+        <!-- PerformanceControl -->
+        <dashboard-tile
+                android:id="@+id/performance_controls"
+                android:title="@string/performance_settings"
+                android:fragment="com.brewcrewfoo.performance.activities.MainActivity"
+                android:icon="@drawable/ic_settings_performance"
+                />
+
         <!-- Superuser -->
         <dashboard-tile
                 android:id="@+id/superuser_settings"
