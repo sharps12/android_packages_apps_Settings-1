@@ -237,8 +237,8 @@ public class StatusBarSettings extends SettingsPreferenceFragment
         if (mClockStyle == null) {
             return;
         }
-        if (Settings.CMREMIX.getInt(getContentResolver(),
-                Settings.CMREMIX.STATUS_BAR_CLOCK, 1) == 1) {
+        if (Settings.System.getInt(getContentResolver(),
+                Settings.System.STATUS_BAR_CLOCK, 1) == 1) {
             mClockStyle.setSummary(getString(R.string.enabled));
         } else {
             mClockStyle.setSummary(getString(R.string.disabled));
