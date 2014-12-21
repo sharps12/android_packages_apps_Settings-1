@@ -33,12 +33,23 @@ import com.android.settings.SettingsPreferenceFragment;
 public class InterfaceSettings extends SettingsPreferenceFragment implements
         Preference.OnPreferenceChangeListener {
 
+    private static final String BUTTON_SETTINGS = "button_settings";
+
+    private PreferenceScreen mButtonSettings;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mButtonSettings = (PreferenceScreen) findPreference(BUTTON_SETTINGS);
+
         addPreferencesFromResource(R.xml.cmremix_interface_settings);
 
+        boolean hasDeviceKeys = getResources().getInteger(
+                com.android.internal.R.integer.config_deviceHardwareKeys) != 0;
+        if (!hasDeviceKeys) {
+            getPreferenceScreen().removePreference(mButtonSettings);
+        }
     }
 
     @Override
