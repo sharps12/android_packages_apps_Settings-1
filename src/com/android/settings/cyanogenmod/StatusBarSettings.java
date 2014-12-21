@@ -21,9 +21,15 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.provider.Settings;
+import android.text.TextUtils;
+import android.view.View;
 
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
+
+import com.android.internal.util.cmremix.DeviceUtils;
+
+import java.util.Locale;
 
 public class StatusBarSettings extends SettingsPreferenceFragment
         implements OnPreferenceChangeListener {
@@ -32,12 +38,14 @@ public class StatusBarSettings extends SettingsPreferenceFragment
 
     private static final String STATUS_BAR_BATTERY_STYLE = "status_bar_battery_style";
     private static final String STATUS_BAR_SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
+    private static final String PRE_QUICK_PULLDOWN = "quick_pulldown";
 
     private static final String STATUS_BAR_BATTERY_STYLE_HIDDEN = "4";
     private static final String STATUS_BAR_BATTERY_STYLE_TEXT = "6";
 
     private ListPreference mStatusBarBattery;
     private ListPreference mStatusBarBatteryShowPercent;
+    private ListPreference mQuickPulldown;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -61,6 +69,24 @@ public class StatusBarSettings extends SettingsPreferenceFragment
         mStatusBarBatteryShowPercent.setValue(String.valueOf(batteryShowPercent));
         mStatusBarBatteryShowPercent.setSummary(mStatusBarBatteryShowPercent.getEntry());
         mStatusBarBatteryShowPercent.setOnPreferenceChangeListener(this);
+
+        mQuickPulldown = (ListPreference) findPreference(PRE_QUICK_PULLDOWN);
+        if (!DeviceUtils.isPhone(getActivity())) {
+            prefSet.removePreference(mQuickPulldown);
+        } else {
+            // Quick Pulldown
+            mQuickPulldown.setOnPreferenceChangeListener(this);
+            int statusQuickPulldown = Settings.CMREMIX.getInt(getContentResolver(),
+                    Settings.CMREMIX.STATUS_BAR_QUICK_QS_PULLDOWN, 1);
+            mQuickPulldown.setValue(String.valueOf(statusQuickPulldown));
+            updateQuickPulldownSummary(statusQuickPulldown);
+        }
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -83,6 +109,13 @@ public class StatusBarSettings extends SettingsPreferenceFragment
             mStatusBarBatteryShowPercent.setSummary(
                     mStatusBarBatteryShowPercent.getEntries()[index]);
             return true;
+        } else if (preference == mQuickPulldown) {
+            int statusQuickPulldown = Integer.valueOf((String) newValue);
+            Settings.CMREMIX.putInt(getContentResolver(),
+                    Settings.CMREMIX.STATUS_BAR_QUICK_QS_PULLDOWN,
+                    statusQuickPulldown);
+            updateQuickPulldownSummary(statusQuickPulldown);
+            return true;
         }
         return false;
     }
@@ -91,5 +124,21 @@ public class StatusBarSettings extends SettingsPreferenceFragment
         boolean enabled = !(value.equals(STATUS_BAR_BATTERY_STYLE_TEXT)
                 || value.equals(STATUS_BAR_BATTERY_STYLE_HIDDEN));
         mStatusBarBatteryShowPercent.setEnabled(enabled);
+    }
+
+    private void updateQuickPulldownSummary(int value) {
+        Resources res = getResources();
+
+        if (value == 0) {
+            // quick pulldown deactivated
+            mQuickPulldown.setSummary(res.getString(R.string.quick_pulldown_off));
+        } else {
+            Locale l = Locale.getDefault();
+            boolean isRtl = TextUtils.getLayoutDirectionFromLocale(l) == View.LAYOUT_DIRECTION_RTL;
+            String direction = res.getString(value == 2
+                    ? (isRtl ? R.string.quick_pulldown_right : R.string.quick_pulldown_left)
+                    : (isRtl ? R.string.quick_pulldown_left : R.string.quick_pulldown_right));
+            mQuickPulldown.setSummary(res.getString(R.string.summary_quick_pulldown, direction));
+        }
     }
 }
