@@ -16,6 +16,7 @@
 package com.android.settings.cyanogenmod;
 
 import android.content.ContentResolver;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -25,6 +26,7 @@ import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.android.settings.R;
@@ -45,6 +47,7 @@ public class StatusBarSettings extends SettingsPreferenceFragment
     private static final String PREF_BLOCK_ON_SECURE_KEYGUARD = "block_on_secure_keyguard";
     private static final String KEY_STATUS_BAR_CLOCK = "clock_style_pref";
     private static final String PREF_SMART_PULLDOWN = "smart_pulldown";
+    private static final String KEY_STATUS_BAR_TICKER = "status_bar_ticker_enabled";
 
     private static final String STATUS_BAR_BATTERY_STYLE_HIDDEN = "4";
     private static final String STATUS_BAR_BATTERY_STYLE_TEXT = "6";
@@ -55,6 +58,7 @@ public class StatusBarSettings extends SettingsPreferenceFragment
     private ListPreference mSmartPulldown;
     private SwitchPreference mBlockOnSecureKeyguard;
     private PreferenceScreen mClockStyle;
+    private SwitchPreference mTicker;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -63,6 +67,15 @@ public class StatusBarSettings extends SettingsPreferenceFragment
 
         PreferenceScreen prefSet = getPreferenceScreen();
         ContentResolver resolver = getActivity().getContentResolver();
+
+        PackageManager pm = getPackageManager();
+        Resources systemUiResources;
+        try {
+            systemUiResources = pm.getResourcesForApplication("com.android.systemui");
+        } catch (Exception e) {
+            Log.e(TAG, "can't access systemui resources",e);
+            return;
+        }
 
         mStatusBarBattery = (ListPreference) findPreference(STATUS_BAR_BATTERY_STYLE);
         mStatusBarBatteryShowPercent =
@@ -110,6 +123,13 @@ public class StatusBarSettings extends SettingsPreferenceFragment
         mClockStyle = (PreferenceScreen) prefSet.findPreference(KEY_STATUS_BAR_CLOCK);
         updateClockStyleDescription();
 
+        mTicker = (SwitchPreference) prefSet.findPreference(KEY_STATUS_BAR_TICKER);
+        final boolean tickerEnabled = systemUiResources.getBoolean(systemUiResources.getIdentifier(
+                    "com.android.systemui:bool/enable_ticker", null, null));
+        mTicker.setChecked(Settings.CMREMIX.getInt(getContentResolver(),
+                Settings.CMREMIX.STATUS_BAR_TICKER_ENABLED, tickerEnabled ? 1 : 0) == 1);
+        mTicker.setOnPreferenceChangeListener(this);
+
     }
 
     @Override
@@ -155,6 +175,11 @@ public class StatusBarSettings extends SettingsPreferenceFragment
         } else if (preference == mBlockOnSecureKeyguard) {
             Settings.Secure.putInt(getContentResolver(),
                     Settings.Secure.STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD,
+                    (Boolean) newValue ? 1 : 0);
+            return true;
+        } else if (preference == mTicker) {
+            Settings.CMREMIX.putInt(getContentResolver(),
+                    Settings.CMREMIX.STATUS_BAR_TICKER_ENABLED,
                     (Boolean) newValue ? 1 : 0);
             return true;
         }
