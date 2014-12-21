@@ -45,6 +45,7 @@ public class StatusBarSettings extends SettingsPreferenceFragment
     private static final String PREF_QUICK_PULLDOWN = "quick_pulldown";
     private static final String PREF_BLOCK_ON_SECURE_KEYGUARD = "block_on_secure_keyguard";
     private static final String KEY_STATUS_BAR_CLOCK = "clock_style_pref";
+    private static final String PREF_SMART_PULLDOWN = "smart_pulldown";
 
     private static final String STATUS_BAR_BATTERY_STYLE_HIDDEN = "4";
     private static final String STATUS_BAR_BATTERY_STYLE_TEXT = "6";
@@ -52,6 +53,7 @@ public class StatusBarSettings extends SettingsPreferenceFragment
     private ListPreference mStatusBarBattery;
     private ListPreference mStatusBarBatteryShowPercent;
     private ListPreference mQuickPulldown;
+    private ListPreference mSmartPulldown;
     private SwitchPreference mBlockOnSecureKeyguard;
     private PreferenceScreen mClockStyle;
 
@@ -80,8 +82,10 @@ public class StatusBarSettings extends SettingsPreferenceFragment
         mStatusBarBatteryShowPercent.setOnPreferenceChangeListener(this);
 
         mQuickPulldown = (ListPreference) findPreference(PREF_QUICK_PULLDOWN);
+        mSmartPulldown = (ListPreference) findPreference(PREF_SMART_PULLDOWN);
         if (!DeviceUtils.isPhone(getActivity())) {
             prefSet.removePreference(mQuickPulldown);
+            prefSet.removePreference(mSmartPulldown);
         } else {
             // Quick Pulldown
             mQuickPulldown.setOnPreferenceChangeListener(this);
@@ -89,6 +93,14 @@ public class StatusBarSettings extends SettingsPreferenceFragment
                     Settings.CMREMIX.STATUS_BAR_QUICK_QS_PULLDOWN, 1);
             mQuickPulldown.setValue(String.valueOf(statusQuickPulldown));
             updateQuickPulldownSummary(statusQuickPulldown);
+
+            // Smart Pulldown
+            mSmartPulldown.setOnPreferenceChangeListener(this);
+            int smartPulldown = Settings.CMREMIX.getInt(getContentResolver(),
+                    Settings.CMREMIX.QS_SMART_PULLDOWN, 0);
+            mSmartPulldown.setValue(String.valueOf(smartPulldown));
+            updateSmartPulldownSummary(smartPulldown);
+
         }
 
         final LockPatternUtils lockPatternUtils = new LockPatternUtils(getActivity());
@@ -139,6 +151,13 @@ public class StatusBarSettings extends SettingsPreferenceFragment
                     statusQuickPulldown);
             updateQuickPulldownSummary(statusQuickPulldown);
             return true;
+        } else if (preference == mSmartPulldown) {
+            int smartPulldown = Integer.valueOf((String) newValue);
+            Settings.CMREMIX.putInt(getContentResolver(),
+                    Settings.CMREMIX.QS_SMART_PULLDOWN,
+                    smartPulldown);
+            updateSmartPulldownSummary(smartPulldown);
+            return true;
         } else if (preference == mBlockOnSecureKeyguard) {
             Settings.Secure.putInt(getContentResolver(),
                     Settings.Secure.STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD,
@@ -152,6 +171,31 @@ public class StatusBarSettings extends SettingsPreferenceFragment
         boolean enabled = !(value.equals(STATUS_BAR_BATTERY_STYLE_TEXT)
                 || value.equals(STATUS_BAR_BATTERY_STYLE_HIDDEN));
         mStatusBarBatteryShowPercent.setEnabled(enabled);
+    }
+
+    private void updateSmartPulldownSummary(int value) {
+        Resources res = getResources();
+
+        if (value == 0) {
+            // Smart pulldown deactivated
+            mSmartPulldown.setSummary(res.getString(R.string.smart_pulldown_off));
+        } else {
+            String type = null;
+            switch (value) {
+                case 1:
+                    type = res.getString(R.string.smart_pulldown_dismissable);
+                    break;
+                case 2:
+                    type = res.getString(R.string.smart_pulldown_persistent);
+                    break;
+                default:
+                    type = res.getString(R.string.smart_pulldown_all);
+                    break;
+            }
+            // Remove title capitalized formatting
+            type = type.toLowerCase();
+            mSmartPulldown.setSummary(res.getString(R.string.smart_pulldown_summary, type));
+        }
     }
 
     private void updateQuickPulldownSummary(int value) {
