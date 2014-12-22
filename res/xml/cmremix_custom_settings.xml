@@ -18,6 +18,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/status_bar_title">
 
+    <!-- Wakelock blocker -->
+    <PreferenceScreen
+        android:key="wakelock_blocker"
+        android:title="@string/wakelock_blocker_title"
+        android:fragment="com.android.settings.cmremix.WakeLockBlocker"
+        android:icon="@drawable/ic_settings_privacy"
+        />
+
     <PreferenceCategory
         android:key="recents_panel"
         android:title="@string/recents_panel_settings" >
