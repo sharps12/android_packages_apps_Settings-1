@@ -58,6 +58,7 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
     private static final String KEY_APP_SWITCH_LONG_PRESS = "hardware_keys_app_switch_long_press";
     private static final String KEY_VOLUME_KEY_CURSOR_CONTROL = "volume_key_cursor_control";
     private static final String KEY_ENABLE_NAVIGATION_BAR = "enable_nav_bar";
+    private static final String KEY_ENABLE_HW_KEYS = "enable_hw_keys";
     private static final String KEY_POWER_END_CALL = "power_end_call";
     private static final String KEY_HOME_ANSWER_CALL = "home_answer_call";
 
@@ -71,6 +72,7 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
     private static final String CATEGORY_VOLUME = "volume_keys";
     private static final String CATEGORY_BACKLIGHT = "key_backlight";
     private static final String CATEGORY_NAVBAR = "navigation_bar";
+    private static final String CATEGORY_HW_KEYS = "hw_keys";
 
     // Available custom actions to perform on a key press.
     // Must match values for KEY_HOME_LONG_PRESS_ACTION in:
@@ -106,6 +108,7 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
     private SwitchPreference mPowerEndCall;
     private SwitchPreference mHomeAnswerCall;
     private SwitchPreference mEnableNavigationBar;
+    private SwitchPreference mEnableHwKeys;
 
     private PreferenceCategory mNavigationPreferencesCat;
 
@@ -169,6 +172,19 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
         mEnableNavigationBar = (SwitchPreference) prefScreen.findPreference(KEY_ENABLE_NAVIGATION_BAR);
         mEnableNavigationBar.setChecked(enableNavigationBar);
         mEnableNavigationBar.setOnPreferenceChangeListener(this);
+
+        // Enable/disable hw keys
+        boolean enableHwKeys = Settings.CMREMIX.getInt(getContentResolver(),
+                Settings.CMREMIX.ENABLE_HW_KEYS, 1) == 1;
+        mEnableHwKeys = (SwitchPreference) findPreference(KEY_ENABLE_HW_KEYS);
+        mEnableHwKeys.setChecked(enableHwKeys);
+        mEnableHwKeys.setOnPreferenceChangeListener(this);
+        // Check if this feature is enable through device config
+        if(!getResources().getBoolean(com.android.internal.R.bool.config_hwKeysPref)) {
+            PreferenceCategory hwKeysPref = (PreferenceCategory)
+                    getPreferenceScreen().findPreference(CATEGORY_HW_KEYS);
+            getPreferenceScreen().removePreference(hwKeysPref);
+        }
 
         if (hasPowerKey) {
             if (!Utils.isVoiceCapable(getActivity())) {
@@ -274,7 +290,7 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
             prefScreen.removePreference(volumeCategory);
         }
 
-        updateDisableNavkeysOption();
+        updateDisableHwKeysOption();
         updateNavBarSettings();
     }
 
@@ -338,7 +354,13 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
             Settings.CMREMIX.putInt(getActivity().getContentResolver(),
                     Settings.CMREMIX.NAVIGATION_BAR_SHOW,
                         ((Boolean) newValue) ? 1 : 0);
-            updateDisableNavkeysOption();
+            return true;
+        } else if (preference == mEnableHwKeys) {
+            boolean hWkeysValue = (Boolean) newValue;
+            Settings.CMREMIX.putInt(getActivity().getApplicationContext().getContentResolver(),
+                    Settings.CMREMIX.ENABLE_HW_KEYS, hWkeysValue ? 1 : 0);
+            writeDisableHwKeysOption(getActivity(), hWkeysValue);
+            updateDisableHwKeysOption();
             return true;
         } else if (preference == mHomeLongPressAction) {
             handleActionListChange(mHomeLongPressAction, newValue,
@@ -372,16 +394,16 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
         return false;
     }
 
-    private static void writeDisableNavkeysOption(Context context, boolean enabled) {
+    private static void writeDisableHwKeysOption(Context context, boolean enabled) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         final int defaultBrightness = context.getResources().getInteger(
                 com.android.internal.R.integer.config_buttonBrightnessSettingDefault);
 
-        Settings.System.putInt(context.getContentResolver(),
-                Settings.CMREMIX.NAVIGATION_BAR_SHOW, enabled ? 1 : 0);
+        Settings.CMREMIX.putInt(context.getContentResolver(),
+                Settings.CMREMIX.ENABLE_HW_KEYS, enabled ? 1 : 0);
 
         if (KeyDisabler.isSupported()) {
-            KeyDisabler.setActive(enabled);
+            KeyDisabler.setActive(!enabled);
         }
 
         /* Save/restore button timeouts to disable them in softkey mode */
@@ -404,11 +426,11 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
         editor.commit();
     }
 
-    private void updateDisableNavkeysOption() {
+    private void updateDisableHwKeysOption() {
         boolean enabled = Settings.CMREMIX.getInt(getActivity().getContentResolver(),
-                Settings.CMREMIX.NAVIGATION_BAR_SHOW, 0) != 0;
+                Settings.CMREMIX.ENABLE_HW_KEYS, 1) == 1;
 
-        mEnableNavigationBar.setChecked(enabled);
+        mEnableHwKeys.setChecked(enabled);
 
         final PreferenceScreen prefScreen = getPreferenceScreen();
 
@@ -424,16 +446,16 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
 
         /* Toggle hardkey control availability depending on navbar state */
         if (homeCategory != null) {
-            homeCategory.setEnabled(!enabled);
+            homeCategory.setEnabled(enabled);
         }
         if (menuCategory != null) {
-            menuCategory.setEnabled(!enabled);
+            menuCategory.setEnabled(enabled);
         }
         if (assistCategory != null) {
-            assistCategory.setEnabled(!enabled);
+            assistCategory.setEnabled(enabled);
         }
         if (appSwitchCategory != null) {
-            appSwitchCategory.setEnabled(!enabled);
+            appSwitchCategory.setEnabled(enabled);
         }
     }
 
@@ -442,8 +464,8 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
             return;
         }
 
-        writeDisableNavkeysOption(context, Settings.CMREMIX.getInt(context.getContentResolver(),
-                Settings.CMREMIX.NAVIGATION_BAR_SHOW, 0) != 0);
+        writeDisableHwKeysOption(context, Settings.CMREMIX.getInt(context.getContentResolver(),
+                Settings.CMREMIX.ENABLE_HW_KEYS, 1) == 1);
     }
 
 
