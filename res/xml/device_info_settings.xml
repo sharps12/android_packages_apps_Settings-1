@@ -51,6 +51,15 @@
                     android:targetClass="com.android.settings.deviceinfo.Status" />
         </PreferenceScreen>
 
+        <!-- cmRemiX Extra Info -->
+        <PreferenceScreen android:key="extrainfo"
+                android:title="@string/cmremixextrainfo"
+                android:summary="@string/cmremixextrainfo_summary">
+            <intent android:action="android.intent.action.MAIN"
+                    android:targetPackage="com.android.settings"
+                    android:targetClass="com.android.settings.cmremix.extrainfo.MainActivity" />
+        </PreferenceScreen>
+
         <!-- Legal Information -->
         <PreferenceScreen
                 android:key="container"
