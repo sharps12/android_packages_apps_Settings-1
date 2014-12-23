@@ -46,4 +46,16 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/extras_cmremix_settings" >
+
+        <!-- Gesture anywhere -->
+        <PreferenceScreen
+            android:key="gesture_anywhere"
+            android:fragment="com.android.settings.cmremix.gestureanywhere.GestureAnywhereSettings"
+            android:title="@string/gesture_anywhere_title" />
+
+    </PreferenceCategory>
+
+
 </PreferenceScreen>
