@@ -537,4 +537,8 @@
          being present in com.android.settings -->
     <string name="supersu_title" translatable="false">SuperSU</string>
 
+    <!-- Display desity -->
+    <string name="display_density">Display density</string>
+    <string name="display_density_summary">Overrides the default display density (0 to disable, requires a reboot)</string>
+
 </resources>
