@@ -55,7 +55,12 @@
             android:fragment="com.android.settings.cmremix.gestureanywhere.GestureAnywhereSettings"
             android:title="@string/gesture_anywhere_title" />
 
-    </PreferenceCategory>
+     <PreferenceScreen
+            android:id="@+id/app_circle_sidebar"
+            android:title="@string/app_circle_bar_title"
+            android:summary="@string/app_circle_sidebar_summary_real"
+            android:fragment="com.android.settings.cmremix.AppCircleSidebar" />
 
+    </PreferenceCategory>
 
 </PreferenceScreen>
