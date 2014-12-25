@@ -60,6 +60,7 @@ import android.provider.SearchIndexableResource;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,6 +97,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
     private static final String KEY_DISPLAY_ROTATION = "display_rotation";
     private static final String KEY_WAKE_WHEN_PLUGGED_OR_UNPLUGGED = "wake_when_plugged_or_unplugged";
     private static final String KEY_DISPLAY_DENSITY = "display_density";
+    private static final String KEY_TOAST_ANIMATION = "toast_animation";
 
     private static final String CATEGORY_ADVANCED = "advanced_display_prefs";
     private static final String KEY_DISPLAY_COLOR = "color_calibration";
@@ -120,6 +122,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
     private SwitchPreference mSunlightEnhancement;
     private SwitchPreference mColorEnhancement;
     private EditTextPreference mDisplayDensity;
+    private ListPreference mToastAnimation;
 
     private ContentObserver mAccelerometerRotationObserver =
             new ContentObserver(new Handler()) {
@@ -170,6 +173,13 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         mDisplayDensity = (EditTextPreference) findPreference(KEY_DISPLAY_DENSITY);
         mDisplayDensity.setText(SystemProperties.get(PROP_DISPLAY_DENSITY, "0"));
         mDisplayDensity.setOnPreferenceChangeListener(this);
+
+        mToastAnimation = (ListPreference) findPreference(KEY_TOAST_ANIMATION);
+        mToastAnimation.setSummary(mToastAnimation.getEntry());
+        int CurrentToastAnimation = Settings.System.getInt(
+                getContentResolver(),Settings.System.TOAST_ANIMATION, 1);
+        mToastAnimation.setValueIndex(CurrentToastAnimation);
+        mToastAnimation.setOnPreferenceChangeListener(this);
 
         if (isAutomaticBrightnessAvailable(getResources())) {
             mAutoBrightnessPreference = (SwitchPreference) findPreference(KEY_AUTO_BRIGHTNESS);
@@ -567,6 +577,14 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         if (preference == mDozePreference) {
             boolean value = (Boolean) objValue;
             Settings.Secure.putInt(getContentResolver(), DOZE_ENABLED, value ? 1 : 0);
+        }
+        if (KEY_TOAST_ANIMATION.equals(key)) {
+            int index = mToastAnimation.findIndexOfValue((String) objValue);
+            Settings.System.putString(getContentResolver(),
+                    Settings.System.TOAST_ANIMATION, (String) objValue);
+            mToastAnimation.setSummary(mToastAnimation.getEntries()[index]);
+            Toast.makeText(getActivity(), "Toast animation test!!!",
+                    Toast.LENGTH_SHORT).show();
         }
         if (KEY_DISPLAY_DENSITY.equals(key)) {
             final int max = getResources().getInteger(R.integer.display_density_max);
