@@ -59,6 +59,7 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
     private static final String KEY_VOLUME_KEY_CURSOR_CONTROL = "volume_key_cursor_control";
     private static final String KEY_ENABLE_NAVIGATION_BAR = "enable_nav_bar";
     private static final String KEY_ENABLE_HW_KEYS = "enable_hw_keys";
+    private static final String KEY_NAVIGATION_BAR_LEFT = "navigation_bar_left";
     private static final String KEY_POWER_END_CALL = "power_end_call";
     private static final String KEY_HOME_ANSWER_CALL = "home_answer_call";
 
@@ -109,6 +110,7 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
     private SwitchPreference mHomeAnswerCall;
     private SwitchPreference mEnableNavigationBar;
     private SwitchPreference mEnableHwKeys;
+    private SwitchPreference mNavigationBarLeftPref;
 
     private Handler mHandler;
 
@@ -187,6 +189,9 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
             getPreferenceScreen().removePreference(hwKeysPref);
         }
 
+        // Navigation bar left
+        mNavigationBarLeftPref = (SwitchPreference) findPreference(KEY_NAVIGATION_BAR_LEFT);
+
         if (hasPowerKey) {
             if (!Utils.isVoiceCapable(getActivity())) {
                 powerCategory.removePreference(mPowerEndCall);
@@ -253,7 +258,6 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
             int pressAction = Settings.System.getInt(resolver,
                     Settings.System.KEY_MENU_ACTION, ACTION_MENU);
             mMenuPressAction = initActionList(KEY_MENU_PRESS, pressAction);
-
             int longPressAction = Settings.System.getInt(resolver,
                         Settings.System.KEY_MENU_LONG_PRESS_ACTION,
                         hasAssistKey ? ACTION_NOTHING : ACTION_SEARCH);
@@ -457,6 +461,9 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
         }
         if (appSwitchCategory != null) {
             appSwitchCategory.setEnabled(enabled);
+        }
+        if (mNavigationBarLeftPref != null) {
+            mNavigationBarLeftPref.setEnabled(enabled);
         }
     }
 

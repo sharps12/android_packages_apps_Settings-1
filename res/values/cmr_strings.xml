@@ -655,4 +655,8 @@
     <!-- Doze (ambient display) preference category -->
     <string name="display_category_doze_options_title">Ambient display options</string>
 
+    <!-- Navigation Bar on the left -->
+    <string name="navigation_bar_left_title">Left-handed mode</string>
+    <string name="navigation_bar_left_summary">Place the navigation bar on the left side of the screen in landscape mode</string>
+
 </resources>
