@@ -49,8 +49,8 @@ public class StatusBarSettings extends SettingsPreferenceFragment
     private static final String PREF_SMART_PULLDOWN = "smart_pulldown";
     private static final String KEY_STATUS_BAR_TICKER = "status_bar_ticker_enabled";
 
-    private static final String STATUS_BAR_BATTERY_STYLE_HIDDEN = "4";
-    private static final String STATUS_BAR_BATTERY_STYLE_TEXT = "6";
+    private static final int STATUS_BAR_BATTERY_STYLE_HIDDEN = 4;
+    private static final int STATUS_BAR_BATTERY_STYLE_TEXT = 6;
 
     private ListPreference mStatusBarBattery;
     private ListPreference mStatusBarBatteryShowPercent;
@@ -91,6 +91,7 @@ public class StatusBarSettings extends SettingsPreferenceFragment
                 Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT, 0);
         mStatusBarBatteryShowPercent.setValue(String.valueOf(batteryShowPercent));
         mStatusBarBatteryShowPercent.setSummary(mStatusBarBatteryShowPercent.getEntry());
+        enableStatusBarBatteryDependents(batteryStyle);
         mStatusBarBatteryShowPercent.setOnPreferenceChangeListener(this);
 
         mQuickPulldown = (ListPreference) findPreference(PREF_QUICK_PULLDOWN);
@@ -147,8 +148,7 @@ public class StatusBarSettings extends SettingsPreferenceFragment
             Settings.System.putInt(
                     resolver, Settings.System.STATUS_BAR_BATTERY_STYLE, batteryStyle);
             mStatusBarBattery.setSummary(mStatusBarBattery.getEntries()[index]);
-
-            enableStatusBarBatteryDependents((String) newValue);
+            enableStatusBarBatteryDependents(batteryStyle);
             return true;
         } else if (preference == mStatusBarBatteryShowPercent) {
             int batteryShowPercent = Integer.valueOf((String) newValue);
@@ -186,10 +186,13 @@ public class StatusBarSettings extends SettingsPreferenceFragment
         return false;
     }
 
-    private void enableStatusBarBatteryDependents(String value) {
-        boolean enabled = !(value.equals(STATUS_BAR_BATTERY_STYLE_TEXT)
-                || value.equals(STATUS_BAR_BATTERY_STYLE_HIDDEN));
-        mStatusBarBatteryShowPercent.setEnabled(enabled);
+    private void enableStatusBarBatteryDependents(int batteryIconStyle) {
+        if (batteryIconStyle == STATUS_BAR_BATTERY_STYLE_HIDDEN ||
+                batteryIconStyle == STATUS_BAR_BATTERY_STYLE_TEXT) {
+            mStatusBarBatteryShowPercent.setEnabled(false);
+        } else {
+            mStatusBarBatteryShowPercent.setEnabled(true);
+        }
     }
 
     private void updateSmartPulldownSummary(int value) {
