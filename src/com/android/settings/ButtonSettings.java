@@ -407,7 +407,7 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
         Settings.CMREMIX.putInt(context.getContentResolver(),
                 Settings.CMREMIX.ENABLE_HW_KEYS, enabled ? 1 : 0);
 
-        if (KeyDisabler.isSupported()) {
+        if (isKeyDisablerSupported()) {
             KeyDisabler.setActive(!enabled);
         }
 
@@ -470,7 +470,7 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
     }
 
     public static void restoreKeyDisabler(Context context) {
-        if (!KeyDisabler.isSupported()) {
+        if (!isKeyDisablerSupported()) {
             return;
         }
 
