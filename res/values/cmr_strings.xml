@@ -21,13 +21,13 @@
     <string name="cmremix_version_default">Unknown</string>
 
     <!-- cmRemiX custom settings -->
-    <string name="cmremix_custom_title">Tweaks</string>
+    <string name="cmremix_custom_title">cmRemiX Tweaks</string>
     <string name="status_bar_settings">Status bar settings</string>
     <string name="recents_panel_settings">Recents panel settings</string>
      <string name="extras_cmremix_settings">cmRemiX extras</string>
 
          <!-- CM-Remix Custom Interface Settings -->
-    <string name="interface_settings_title">Interface</string>
+    <string name="interface_settings_title">cmRemiX Interface</string>
 
     <!-- Settings main menu category heading. Rom (Launcher, Themes, System). [CHAR LIMIT=40] -->
     <string name="header_category_rom_settings">Advanced settings</string>

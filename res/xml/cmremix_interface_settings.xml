@@ -19,11 +19,20 @@
     android:title="@string/interface_settings_title"
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings">
 
+    <!-- Status bar -->
+    <PreferenceScreen
+        android:key="status_bar_settings"
+        android:title="@string/status_bar_title"
+        android:fragment="com.android.settings.cyanogenmod.StatusBarSettings"
+        android:icon="@drawable/ic_settings_home"
+        />
     <!-- Display and Animations -->
     <PreferenceScreen
         android:id="@+id/disp_anim_settings"
         android:title="@string/disp_anim_settings_title"
-        android:fragment="com.android.settings.cmremix.DisplayAnimationsSettings" />
+        android:fragment="com.android.settings.cmremix.DisplayAnimationsSettings"
+        android:icon="@drawable/ic_settings_home"
+        />
 
     <!-- Buttons settings -->
     <PreferenceScreen
@@ -31,14 +40,6 @@
         android:title="@string/button_pref_title"
         android:fragment="com.android.settings.ButtonSettings"
         android:icon="@drawable/ic_settings_buttons"
-        />
-
-    <!-- Status bar -->
-    <PreferenceScreen
-        android:key="status_bar_settings"
-        android:title="@string/status_bar_title"
-        android:fragment="com.android.settings.cyanogenmod.StatusBarSettings"
-        android:icon="@drawable/ic_settings_home"
         />
 
 </PreferenceScreen>
