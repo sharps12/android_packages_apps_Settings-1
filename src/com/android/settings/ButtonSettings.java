@@ -42,6 +42,8 @@ import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
 import com.android.settings.Utils;
 
+import android.widget.Toast;
+
 import org.cyanogenmod.hardware.KeyDisabler;
 
 import com.android.internal.util.cmremix.CrUtils;
@@ -54,6 +56,7 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
     private static final String KEY_HOME_DOUBLE_TAP = "hardware_keys_home_double_tap";
     private static final String KEY_MENU_PRESS = "hardware_keys_menu_press";
     private static final String KEY_MENU_LONG_PRESS = "hardware_keys_menu_long_press";
+    private static final String KEYS_OVERFLOW_BUTTON = "keys_overflow_button";
     private static final String KEY_APP_SWITCH_PRESS = "hardware_keys_app_switch_press";
     private static final String KEY_APP_SWITCH_LONG_PRESS = "hardware_keys_app_switch_long_press";
     private static final String KEY_VOLUME_KEY_CURSOR_CONTROL = "volume_key_cursor_control";
@@ -103,6 +106,7 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
     private ListPreference mHomeDoubleTapAction;
     private ListPreference mMenuPressAction;
     private ListPreference mMenuLongPressAction;
+    private ListPreference mOverflowButtonMode;
     private ListPreference mAppSwitchPressAction;
     private ListPreference mAppSwitchLongPressAction;
     private ListPreference mVolumeKeyCursorControl;
@@ -190,6 +194,9 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
                     getPreferenceScreen().findPreference(CATEGORY_HW_KEYS);
             getPreferenceScreen().removePreference(hwKeysPref);
         }
+
+        mOverflowButtonMode = (ListPreference) findPreference(KEYS_OVERFLOW_BUTTON);
+        mOverflowButtonMode.setOnPreferenceChangeListener(this);
 
         // Navigation bar left
         mNavigationBarLeftPref = (SwitchPreference) findPreference(KEY_NAVIGATION_BAR_LEFT);
@@ -354,6 +361,11 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
                 CrUtils.isNavBarDefault(getActivity()) ? 1 : 0) == 1;
         mEnableNavigationBar.setChecked(enableNavigationBar);
 
+        String overflowButtonMode = Integer.toString(Settings.System.getInt(getContentResolver(),
+                Settings.System.UI_OVERFLOW_BUTTON, 2));
+        mOverflowButtonMode.setValue(overflowButtonMode);
+        mOverflowButtonMode.setSummary(mOverflowButtonMode.getEntry());
+
         updateNavbarPreferences(enableNavigationBar);
     }
 
@@ -367,6 +379,11 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
             Settings.CMREMIX.putInt(getActivity().getContentResolver(),
                     Settings.CMREMIX.NAVIGATION_BAR_SHOW,
                         ((Boolean) newValue) ? 1 : 0);
+            // Enable overflow button
+            Settings.System.putInt(getContentResolver(), Settings.System.UI_OVERFLOW_BUTTON, 2);
+            if (mOverflowButtonMode != null) {
+                mOverflowButtonMode.setSummary(mOverflowButtonMode.getEntries()[2]);
+            }
             return true;
         } else if (preference == mEnableHwKeys) {
             boolean hWkeysValue = (Boolean) newValue;
@@ -402,6 +419,13 @@ public class ButtonSettings extends SettingsPreferenceFragment implements
         } else if (preference == mVolumeKeyCursorControl) {
             handleActionListChange(mVolumeKeyCursorControl, newValue,
                     Settings.System.VOLUME_KEY_CURSOR_CONTROL);
+            return true;
+        } else if (preference == mOverflowButtonMode) {
+            int val = Integer.parseInt((String) newValue);
+            int index = mOverflowButtonMode.findIndexOfValue((String) newValue);
+            Settings.System.putInt(getContentResolver(), Settings.System.UI_OVERFLOW_BUTTON, val);
+            mOverflowButtonMode.setSummary(mOverflowButtonMode.getEntries()[index]);
+            Toast.makeText(getActivity(), R.string.keys_overflow_toast, Toast.LENGTH_LONG).show();
             return true;
         }
         return false;
